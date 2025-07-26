@@ -18,6 +18,10 @@ class Player:
 
 
     def get_post_request(self, action):
+        """
+        Return appropriate POST request URLs based in action suffix
+        :param action:
+        """
         url = f"{self.SERVER_URL}/my/{self.name}/action/{action}"
         headers = {
             "Content-Type": "application/json",
@@ -28,6 +32,10 @@ class Player:
 
 
     def get_get_request(self, action):
+        """
+        Return appropriate GET request URLs based in action suffix
+        :param action:
+        """
         url = f"{self.SERVER_URL}/my/{action}"
         headers = {
             "Content-Type": "application/json",
@@ -38,6 +46,10 @@ class Player:
 
 
     def get_character_data(self):
+        """
+        Get all characters' metadata as JSON.
+        Needed for depositing.
+        """
         url, headers = self.get_get_request("characters")
 
         response = requests.get(url, headers=headers)
@@ -46,13 +58,29 @@ class Player:
 
 
     def check_banking(self, response):
+        """
+        If response code 497, player has a full inventory and needs to deposit.
+        :param response:
+        """
         if response.status_code == 497:
             self.move(*self.bank_coords)
             self.deposit()
             self.move(*self.coords)
 
 
+    def check_loss(self, data):
+        """
+        Receive json data of a response. If a fight is lost, return to the coordinates
+        """
+        if data["data"]["fight"]["result"] == "loss":
+            self.move(*self.coords)
+
+
     def get_inventory_list(self):
+        """
+        Get inventory of current character and return as JSON.
+        Needed to deposit items into bank.
+        """
         character_data = self.get_character_data()
 
         for character in character_data.get("data", []):
@@ -72,6 +100,11 @@ class Player:
 
 
     def deposit(self):
+        """
+        Check current inventory of character and deposit everything into bank
+
+        @requires: Must be standing on bank place
+        """
         inventory = self.get_inventory_list()
         url, headers = self.get_post_request("bank/deposit/item")
 
@@ -82,6 +115,11 @@ class Player:
 
 
     def move(self, x, y):
+        """
+        Move to coordinates
+        :param x:
+        :param y:
+        """
         url, headers = self.get_post_request("move")
         json_body = {"x": x, "y": y}
 
@@ -91,15 +129,24 @@ class Player:
 
 
     def fight(self):
+        """
+        Fight at current place.
+        Checks for full inventory and if fight is lost
+        """
         url, headers = self.get_post_request("fight")
         response = requests.post(url, headers=headers)
         data = response.json()
 
         self.cooldown_timer(data)
         self.check_banking(response)
+        self.check_loss(data)
 
 
     def fight_loop(self):
+        """
+        Keep fighting indefinitely at current place.
+        Always switch between fight and rest.
+        """
         self.move(*self.coords)
         while True:
             self.fight()
@@ -107,6 +154,9 @@ class Player:
 
 
     def rest(self):
+        """
+        Regain all HP
+        """
         url, headers = self.get_post_request("rest")
         response = requests.post(url, headers=headers)
         data = response.json()
@@ -114,6 +164,10 @@ class Player:
 
 
     def cooldown_timer(self, data):
+        """
+        Receive JSON response data and wait for its cooldown
+        :param data of requests.response:
+        """
         try:
             cooldown = data["data"]["cooldown"]["total_seconds"]
         except KeyError:
@@ -124,6 +178,9 @@ class Player:
 
 
     def gather(self):
+        """
+        Gather resources at current place
+        """
         url, headers = self.get_post_request("gathering")
         response = requests.post(url, headers=headers)
         data = response.json()
@@ -132,6 +189,9 @@ class Player:
 
 
     def gather_loop(self):
+        """
+        Gather resources at current place indefinitely
+        """
         self.move(*self.coords)
         while True:
             self.gather()
