@@ -67,7 +67,6 @@ class Player:
                 item.pop('slot', None)
 
             inventory = json.dumps(filtered_inventory)
-            print(inventory)
             return inventory
         return None
 
@@ -78,6 +77,7 @@ class Player:
 
         response = requests.post(url, headers=headers, data=inventory)
         data = response.json()
+        print(f"[{self.name}]: Dumping inventory")
         self.cooldown_timer(data)
 
 
@@ -117,7 +117,7 @@ class Player:
         try:
             cooldown = data["data"]["cooldown"]["total_seconds"]
         except KeyError:
-            print(f"[{self.name}] [{data["error"]["code"]}]: {data['error']['message']}")
+            print(f"[{self.name}] [{data['error']['code']}]: {data['error']['message']}")
             return
 
         time.sleep(cooldown)
