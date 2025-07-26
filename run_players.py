@@ -12,13 +12,13 @@ import argparse
 # Combat Lv1
 def fighting(player):
     print(f"[{player.name}] Starting to fight")
-    player.coords(*args.coords)
+    player.coords = args.coords
     player.fight_loop()
 
 # Gather Lv1
 def gathering(player):
     print(f"[{player.name}] Starting to gather")
-    player.coords(*args.coords)
+    player.coords = args.coords
     player.gather_loop()
 
 
