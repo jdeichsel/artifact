@@ -11,6 +11,7 @@ class Player:
         self.coords = (None, None)
         self.bank_coords = (4, 1)
         self.ws_mining_coords = (1, 5)
+        self.ws_woodcutting_coords = (-2, -3)
 
     def get_api_token(self):
         with open("secret.txt") as file:
@@ -233,12 +234,26 @@ class Player:
         """
         while True:
             self.move(*self.bank_coords)
+            self.deposit()
             # if the withdraw fails, theres no more copper and we can stop
-            if not self.withdraw("copper_ore", 80):
+            if not self.withdraw("copper_ore", 100):
                 break
             self.move(*self.ws_mining_coords)
-            self.craft("copper_bar", 8)
+            self.craft("copper_bar", 10)
 
+    def craft_ash_planks(self):
+        """
+        Craft copper bars in the Mining Workshop (1, 5)
+        Stop when withdrawing copper ore from bank doesnt work
+        """
+        while True:
+            self.move(*self.bank_coords)
+            self.deposit()
+            # if the withdraw fails, theres no more copper and we can stop
+            if not self.withdraw("ash_wood", 100):
+                break
+            self.move(*self.ws_woodcutting_coords)
+            self.craft("ash_plank", 10)
 
 
 if __name__ == '__main__':
