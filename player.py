@@ -70,9 +70,11 @@ class Player:
 
     def check_loss(self, data):
         """
-        Receive json data of a response. If a fight is lost, return to the coordinates
+        Receive json data of a response.
+        If a fight is lost, heal and return to the coordinates.
         """
         if data["data"]["fight"]["result"] == "loss":
+            self.rest()
             self.move(*self.coords)
 
 
