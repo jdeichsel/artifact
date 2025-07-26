@@ -46,7 +46,7 @@ class Player:
 
 
     def check_banking(self, response):
-        if response.status == 497:
+        if response.status_code == 497:
             self.move(*self.bank_coords)
             self.deposit()
             self.move(*self.coords)
@@ -96,6 +96,7 @@ class Player:
         data = response.json()
 
         self.cooldown_timer(data)
+        self.check_banking(response)
 
 
     def fight_loop(self):
@@ -127,6 +128,7 @@ class Player:
         response = requests.post(url, headers=headers)
         data = response.json()
         self.cooldown_timer(data)
+        self.check_banking(response)
 
 
     def gather_loop(self):
