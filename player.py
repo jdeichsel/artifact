@@ -73,9 +73,12 @@ class Player:
         Receive json data of a response.
         If a fight is lost, heal and return to the coordinates.
         """
-        if data["data"]["fight"]["result"] == "loss":
-            self.rest()
-            self.move(*self.coords)
+        try:
+            if data["data"]["fight"]["result"] == "loss":
+                self.rest()
+                self.move(*self.coords)
+        except KeyError:
+            print(f"[{self.name}]: Could not find data, likely a start-up error")
 
 
     def get_inventory_list(self):
