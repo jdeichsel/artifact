@@ -2,6 +2,7 @@ import json
 import time
 import requests
 from colorama import init, Fore, Style
+from datetime import datetime
 
 
 class Player:
@@ -17,6 +18,10 @@ class Player:
         self.ws_woodcutting_coords = (-2, -3)
         self.ws_cooking_coords = (1, 1)
         self.ws_alchemy_coords = (2, 3)
+
+    @staticmethod
+    def time():
+        return datetime.now().strftime("%H:%M:%S")
 
     @staticmethod
     def color_text(text, color):
@@ -115,7 +120,7 @@ class Player:
                 self.rest()
                 self.move(*self.coords)
         except KeyError:
-            print(f"[{self.name}]: " + self.color_text("Could not find data, likely a start-up error", "red"))
+            print(f"[{self.name}][{self.time()}]: " + self.color_text("Could not find data, likely a start-up error", "red"))
 
     def get_inventory_list(self):
         """
@@ -153,11 +158,11 @@ class Player:
         response = requests.post(url, headers=headers, data=json_body)
         if response.status_code <= 200:
             data = response.json()
-            print(f"[{self.name}]: " + self.color_text(f"Withdrawing {amount}x {item}", "cyan"))
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Withdrawing {amount}x {item}", "cyan"))
             self.cooldown_timer(data)
             return True
         else:
-            print(f"[{self.name}]: " + self.color_text(f"Failed to withdraw {amount}x {item}", "red"))
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Failed to withdraw {amount}x {item}", "red"))
             return False
 
     def deposit(self):
@@ -171,7 +176,7 @@ class Player:
 
         response = requests.post(url, headers=headers, data=inventory)
         data = response.json()
-        print(f"[{self.name}]: " + self.color_text(f"Dumping inventory", "cyan"))
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Dumping inventory", "cyan"))
         self.cooldown_timer(data)
 
 
@@ -186,11 +191,11 @@ class Player:
         response = requests.post(url, headers=headers, data=json_body)
         if response.status_code <= 200:
             data = response.json()
-            print(f"[{self.name}]: " + self.color_text(f"Crafting {amount}x {item}", "yellow"))
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Crafting {amount}x {item}", "yellow"))
             self.cooldown_timer(data)
             return True
         else:
-            print(f"[{self.name}]: " + self.color_text(f"Bad Crafting! [{response.status_code}] {response.text}", "red"))
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Bad Crafting! [{response.status_code}] {response.text}", "red"))
             return False
 
     def move(self, x, y):
@@ -246,7 +251,7 @@ class Player:
         try:
             cooldown = data["data"]["cooldown"]["total_seconds"]
         except KeyError:
-            print(f"[{self.name}]: " + self.color_text(f"[{data['error']['code']}]: {data['error']['message']}", "red"))
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"[{data['error']['code']}]: {data['error']['message']}", "red"))
             return
 
         time.sleep(cooldown)
