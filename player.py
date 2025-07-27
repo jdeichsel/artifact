@@ -313,6 +313,7 @@ class Player:
         Craft copper bars in the Mining Workshop (1, 5)
         Stop when withdrawing materials from bank doesnt work
         """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft copper bars...", "magenta"))
         copper_bars_recipe = [("copper_ore", 100)]
         self.craft_loop(self.ws_mining_coords, copper_bars_recipe, "copper_bar", 10)
 
@@ -321,6 +322,7 @@ class Player:
         Craft iron bars in the Mining Workshop (1, 5)
         Stop when withdrawing materials from bank doesnt work
         """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft iron bars...", "magenta"))
         iron_bars_recipe = [("iron_ore", 100)]
         self.craft_loop(self.ws_mining_coords, iron_bars_recipe, "iron_bar", 10)
 
@@ -329,6 +331,7 @@ class Player:
         Craft ash planks in the Woodcutting Workshop (-2, -3)
         Stop when withdrawing materials from bank doesnt work
         """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft ash planks...", "magenta"))
         ash_planks_recipe = [("ash_wood", 100)]
         self.craft_loop(self.ws_woodcutting_coords, ash_planks_recipe, "ash_plank", 10)
 
@@ -337,6 +340,7 @@ class Player:
         Craft spruce planks in the Woodcutting Workshop (-2, -3)
         Stop when withdrawing materials from bank doesnt work
         """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft spruce planks...", "magenta"))
         spruce_planks_recipe = [("spruce_wood", 100)]
         self.craft_loop(self.ws_woodcutting_coords, spruce_planks_recipe, "spruce_plank", 10)
 
@@ -345,6 +349,7 @@ class Player:
         Cook gudgeon fish in the Cooking Workshop (1, 1)
         Stop when withdrawing materials from bank doesnt work
         """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft cooked gudgeon...", "magenta"))
         cooked_gudgeon_recipe = [("gudgeon", 100)]
         self.craft_loop(self.ws_cooking_coords, cooked_gudgeon_recipe, "cooked_gudgeon", 100)
 
@@ -353,6 +358,7 @@ class Player:
         Cook chicken in the Cooking Workshop (1, 1)
         Stop when withdrawing materials from bank doesnt work
         """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft cooked chicken...", "magenta"))
         cooked_chicken_recipe = [("raw_chicken", 100)]
         self.craft_loop(self.ws_cooking_coords, cooked_chicken_recipe, "cooked_chicken", 100 )
 
@@ -362,6 +368,7 @@ class Player:
         Needs appropriate Alchemy Gathering level 5+
         Stop when withdrawing materials from bank doesnt work
         """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft small HP potions...", "magenta"))
         small_hp_potion_recipe = [("sunflower", 99)]
         self.craft_loop(self.ws_alchemy_coords, small_hp_potion_recipe, "small_health_potion", 33)
 
@@ -371,6 +378,7 @@ class Player:
         Needs appropriate Alchemy Gathering level 10+
         Stop when withdrawing materials from bank doesnt work
         """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Earth boost potions...", "magenta"))
         earth_boost_potion_recipe = [("sunflower", 33), ("yellow_slimeball", 33), ("algae", 33)]
         self.craft_loop(self.ws_alchemy_coords, earth_boost_potion_recipe, "earth_boost_potion", 33)
 
