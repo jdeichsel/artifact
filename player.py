@@ -240,7 +240,13 @@ class Player:
         url, headers = self.get_post_request("move")
         json_body = {"x": x, "y": y}
 
+
         response = requests.post(url, headers=headers, json=json_body)
+        while response.status_code > 200 and response.status_code != 490:  # 490 = character already at destination
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"[{response.status_code}]: Tried moving, must be on cooldown!", "red"))
+            time.sleep(5)
+            response = requests.post(url, headers=headers, json=json_body)
+
         data = response.json()
         self.cooldown_timer(data)
 
