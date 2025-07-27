@@ -312,7 +312,7 @@ class Player:
         Stop when withdrawing materials from bank doesnt work
         """
         cooked_gudgeon_recipe = [("gudgeon", 100)]
-        self.craft_loop(self.ws_woodcutting_coords, cooked_gudgeon_recipe, "cooked_gudgeon", 100)
+        self.craft_loop(self.ws_cooking_coords, cooked_gudgeon_recipe, "cooked_gudgeon", 100)
 
     def craft_cooked_chicken(self):
         """
@@ -320,7 +320,7 @@ class Player:
         Stop when withdrawing materials from bank doesnt work
         """
         cooked_chicken_recipe = [("raw_chicken", 100)]
-        self.craft_loop(self.ws_woodcutting_coords, cooked_chicken_recipe, "cooked_chicken", 100 )
+        self.craft_loop(self.ws_cooking_coords, cooked_chicken_recipe, "cooked_chicken", 100 )
 
     def craft_small_hp_potion(self):
         """
