@@ -338,7 +338,7 @@ class Player:
         Stop when withdrawing materials from bank doesnt work
         """
         earth_boost_potion_recipe = [("sunflower", 33), ("yellow_slimeball", 33), ("algae", 33)]
-        self.craft_loop(self.ws_alchemy_coords, earth_boost_potion_recipe, "small_health_potion", 33)
+        self.craft_loop(self.ws_alchemy_coords, earth_boost_potion_recipe, "earth_boost_potion", 33)
 
     def craft_loop(self, ws_coords, inputs, output, output_qty):
         """
