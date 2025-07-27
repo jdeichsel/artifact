@@ -31,7 +31,10 @@ import argparse
 # (Lv40) wood: maple tree: (4, 14)
 
 
-
+def crafting(player):
+    print(f"[{player.name}] Starting to craft")
+    player.craft_copper_bars()
+    player.craft_ash_planks()
 
 
 def fighting(player):
@@ -59,6 +62,7 @@ if __name__ == '__main__':
     player = player.Player(args.player)
     player.coords = coords
     if args.action == "fight":
+        crafting(player)
         fighting(player)
     else:
         gathering(player)

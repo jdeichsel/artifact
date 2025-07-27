@@ -258,8 +258,8 @@ class Player:
 
 if __name__ == '__main__':
     pass
-    BlueMaiden = Player("BlueMaiden")
-    BlueMaiden.craft_copper_bars()
+    # BlueMaiden = Player("BlueMaiden")
+    # BlueMaiden.craft_copper_bars()
     # move("BlueMaiden", 0, 1)
     # fight("BlueMaiden")
     # rest("BlueMaiden")
