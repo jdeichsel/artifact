@@ -263,7 +263,7 @@ class Player:
         Needs appropriate Alchemy Gathering level 5+
         Stop when withdrawing chicken from bank doesnt work
         """
-        self.craft_loop(self.ws_alchemy_coords, "raw_chicken", 100, "cooked_chicken", 100)
+        self.craft_loop(self.ws_alchemy_coords, "sunflower", 99, "small_health_potion", 33)
 
     def craft_loop(self, ws_coords, input, input_qty, output, output_qty):
         """
