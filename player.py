@@ -249,7 +249,7 @@ class Player:
         while True:
             self.move(*self.bank_coords)
             self.deposit()
-            # if the withdraw fails, theres no more copper and we can stop
+            # if the withdraw fails, theres no more wood and we can stop
             if not self.withdraw("ash_wood", 100):
                 break
             self.move(*self.ws_woodcutting_coords)

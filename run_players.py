@@ -1,11 +1,10 @@
 import ast
-
 import player
-import threading
 import argparse
 
 
 # (Lv1) fight: chicken: (0, 1)
+# (Lv2) fight: yellow slime: (1, -2)
 
 
 # (Lv1) fishing: gudgeon: (4, 2)
@@ -35,18 +34,10 @@ import argparse
 
 
 
-
-
-
-
-
-
-# Combat Lv1
 def fighting(player):
     print(f"[{player.name}] Starting to fight")
     player.fight_loop()
 
-# Gather Lv1
 def gathering(player):
     print(f"[{player.name}] Starting to gather")
     player.gather_loop()
