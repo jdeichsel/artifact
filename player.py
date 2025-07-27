@@ -8,6 +8,7 @@ class Player:
         self.SERVER_URL = "https://api.artifactsmmo.com"
         self.API_TOKEN = self.get_api_token()
         self.name = name
+        self.role = None
         self.coords = (None, None)
         self.bank_coords = (4, 1)
         self.ws_mining_coords = (1, 5)
@@ -60,12 +61,21 @@ class Player:
     def check_banking(self, response):
         """
         If response code 497, player has a full inventory and needs to deposit.
-        :param response:
+        Check after depositing if theres any craftable items in bank
         """
         if response.status_code == 497:
             self.move(*self.bank_coords)
             self.deposit()
             self.move(*self.coords)
+
+            if self.role == "mining":
+                self.craft_all_bars()
+            elif self.role == "wood":
+                self.craft_all_planks()
+            elif self.role == "fishing":
+                self.craft_all_food()
+            elif self.role == "alchemy":
+                self.craft_all_potions()
 
     def check_loss(self, data):
         """
@@ -124,7 +134,7 @@ class Player:
     def deposit(self):
         """
         Check current inventory of character and deposit everything into bank
-
+        Depending on character role: crafts gathered materials
         @requires: Must be standing on bank place
         """
         inventory = self.get_inventory_list()
@@ -134,6 +144,7 @@ class Player:
         data = response.json()
         print(f"[{self.name}]: Dumping inventory")
         self.cooldown_timer(data)
+
 
     def craft(self, item, amount):
         """
@@ -229,56 +240,127 @@ class Player:
         while True:
             self.gather()
 
+    def craft_all_planks(self):
+        """
+        Cycles through all available recipes and crafts all items
+        Any order is okay, no overlaps
+        """
+        self.craft_ash_planks()
+        self.craft_spruce_planks()
+
+    def craft_all_bars(self):
+        """
+        Cycles through all available recipes and crafts all items
+        Any order is okay, no overlaps
+        """
+        self.craft_copper_bars()
+        self.craft_iron_bars()
+
+    def craft_all_food(self):
+        """
+        Cycles through all available recipes and crafts all items
+        Any order is okay, only very small overlaps
+        """
+        self.craft_cooked_chicken()
+        self.craft_cooked_gudgeon()
+
+    def craft_all_potions(self):
+        """
+        Cycles through all available recipes and crafts all items
+        Starting with the highest level requirement, as the small HP potion eats all sunflowers
+        :return:
+        """
+        self.craft_earth_boost_potion()
+        self.craft_small_hp_potion()
+
+
     def craft_copper_bars(self):
         """
         Craft copper bars in the Mining Workshop (1, 5)
-        Stop when withdrawing copper ore from bank doesnt work
+        Stop when withdrawing materials from bank doesnt work
         """
-        self.craft_loop(self.ws_mining_coords, "copper_ore", 100, "copper_bar", 10)
+        copper_bars_recipe = [("copper_ore", 100)]
+        self.craft_loop(self.ws_mining_coords, copper_bars_recipe, "copper_bar", 10)
+
+    def craft_iron_bars(self):
+        """
+        Craft iron bars in the Mining Workshop (1, 5)
+        Stop when withdrawing materials from bank doesnt work
+        """
+        iron_bars_recipe = [("iron_ore", 100)]
+        self.craft_loop(self.ws_mining_coords, iron_bars_recipe, "iron_bar", 10)
 
     def craft_ash_planks(self):
         """
-        Craft copper bars in the Woodcutting Workshop (-2, -3)
-        Stop when withdrawing ash wood from bank doesnt work
+        Craft ash planks in the Woodcutting Workshop (-2, -3)
+        Stop when withdrawing materials from bank doesnt work
         """
-        self.craft_loop(self.ws_woodcutting_coords, "ash_wood", 100, "ash_plank", 10)
+        ash_planks_recipe = [("ash_wood", 100)]
+        self.craft_loop(self.ws_woodcutting_coords, ash_planks_recipe, "ash_plank", 10)
+
+    def craft_spruce_planks(self):
+        """
+        Craft spruce planks in the Woodcutting Workshop (-2, -3)
+        Stop when withdrawing materials from bank doesnt work
+        """
+        spruce_planks_recipe = [("spruce_wood", 100)]
+        self.craft_loop(self.ws_woodcutting_coords, spruce_planks_recipe, "spruce_plank", 10)
 
     def craft_cooked_gudgeon(self):
         """
         Cook gudgeon fish in the Cooking Workshop (1, 1)
-        Stop when withdrawing gudgeon fish from bank doesnt work
+        Stop when withdrawing materials from bank doesnt work
         """
-        self.craft_loop(self.ws_woodcutting_coords, "gudgeon", 100, "cooked_gudgeon", 100)
+        cooked_gudgeon_recipe = [("gudgeon", 100)]
+        self.craft_loop(self.ws_woodcutting_coords, cooked_gudgeon_recipe, "cooked_gudgeon", 100)
 
     def craft_cooked_chicken(self):
         """
         Cook chicken in the Cooking Workshop (1, 1)
-        Stop when withdrawing chicken from bank doesnt work
+        Stop when withdrawing materials from bank doesnt work
         """
-        self.craft_loop(self.ws_woodcutting_coords, "raw_chicken", 100, "cooked_chicken", 100 )
+        cooked_chicken_recipe = [("raw_chicken", 100)]
+        self.craft_loop(self.ws_woodcutting_coords, cooked_chicken_recipe, "cooked_chicken", 100 )
 
     def craft_small_hp_potion(self):
         """
         Crafting small HP Potion in the Alchemy Workshop (2, 3)
         Needs appropriate Alchemy Gathering level 5+
-        Stop when withdrawing chicken from bank doesnt work
+        Stop when withdrawing materials from bank doesnt work
         """
-        self.craft_loop(self.ws_alchemy_coords, "sunflower", 99, "small_health_potion", 33)
+        small_hp_potion_recipe = [("sunflower", 99)]
+        self.craft_loop(self.ws_alchemy_coords, small_hp_potion_recipe, "small_health_potion", 33)
 
-    def craft_loop(self, ws_coords, input, input_qty, output, output_qty):
+    def craft_earth_boost_potion(self):
+        """
+        Crafting small HP Potion in the Alchemy Workshop (2, 3)
+        Needs appropriate Alchemy Gathering level 10+
+        Stop when withdrawing materials from bank doesnt work
+        """
+        earth_boost_potion_recipe = [("sunflower", 33), ("yellow_slimeball", 33), ("algae", 33)]
+        self.craft_loop(self.ws_alchemy_coords, earth_boost_potion_recipe, "small_health_potion", 33)
+
+    def craft_loop(self, ws_coords, inputs, output, output_qty):
         """
         :param ws_coords: workshop coordinates to craft at
-        :param input: must be correct item codes
-        :param input_qty:
-        :param output: must be correct item codes
-        :param output_qty:
+        :param inputs: list of tuples (item_code, qty)
+        :param output: output item code
+        :param output_qty: quantity of output item
         """
         while True:
             self.move(*self.bank_coords)
             self.deposit()
-            # if the withdraw fails, theres no more materials and we can stop
-            if not self.withdraw(input, input_qty):
+
+            all_withdrawn = True
+            for item_code, qty in inputs:
+                if not self.withdraw(item_code, qty):
+                    all_withdrawn = False
+                    break
+
+            if not all_withdrawn:
+                self.deposit()
                 break
+
             self.move(*ws_coords)
             self.craft(output, output_qty)
 
