@@ -3,7 +3,7 @@ SESSION="artifact"
 tmux new-session -d -s $SESSION
 
 declare -a PLAYERS=("BlueMaiden" "WoodenMaiden" "MiningMaiden" "FishMaiden" "AlchMaiden")
-ACTIONS=("fight" "gather" "gather" "gather" "alchemy")
+ACTIONS=("fight" "wood" "mining" "fishing" "alchemy")
 COORDS=("(1, -2)" "(1, 9)" "(1, 7)" "(5, 2)" "(2, 2)")
 
 for i in "${!PLAYERS[@]}"; do
