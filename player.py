@@ -21,6 +21,7 @@ class Player:
         self.ws_cooking_coords = (1, 1)
         self.ws_alchemy_coords = (2, 3)
         self.ws_weaponcrafting_coords = (2, 1)
+        self.ws_gearcrafting_coords = (3, 1)
 
         # Skill levels
         self.combat = None
@@ -123,18 +124,17 @@ class Player:
             elif self.role == "alchemy":
                 self.craft_all_potions()
             elif self.role == "fight":
-                self.craft_all_weapons()
+                self.craft_all_gear()
 
             self.move(*self.coords)
 
     def check_loss(self, data):
         """
         Receive json data of a response.
-        If a fight is lost, heal and return to the coordinates.
+        If a fight is lost, return to the coordinates.
         """
         try:
             if data["data"]["fight"]["result"] == "loss":
-                self.rest()
                 self.move(*self.coords)
         except KeyError:
             print(f"[{self.name}][{self.time()}]: " + self.color_text("Could not find data, likely a start-up error", "red"))
@@ -215,6 +215,11 @@ class Player:
             return False
 
     def recycle(self, item, amount):
+        """
+        You need to be standing on the workshop where you crafted the item to recycle it!
+        :param item:
+        :param amount:
+        """
         url, headers = self.get_post_request("recycling")
         json_body = json.dumps({"code": item, "quantity": amount})
 
@@ -224,8 +229,7 @@ class Player:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Recycling {amount}x {item}", "yellow"))
             self.cooldown_timer(data)
         else:
-            print(f"[{self.name}][{self.time()}]: " + self.color_text(
-                f"Bad Recycling! [{response.status_code}] {response.text}", "red"))
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Bad Recycling! [{response.status_code}] {response.text}", "red"))
 
     def move(self, x, y):
         """
@@ -280,7 +284,7 @@ class Player:
         try:
             cooldown = data["data"]["cooldown"]["total_seconds"]
         except KeyError:
-            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"[{data['error']['code']}]: {data['error']['message']}", "red"))
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Cooldown Timer Error! [{data['error']['code']}]: {data['error']['message']}", "red"))
             return
 
         time.sleep(cooldown)
@@ -341,7 +345,33 @@ class Player:
         Goes through all weapon recipes and crafts all items
         Starting with the highest level requirement recipes
         """
-        self.craft_apprentice_gloves()
+        self.get_skills_lvl()
+
+        # Lv1-4 Recipes
+        if self.weaponcrafting < 5:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Crafting Lv1-4 weapons..", "magenta"))
+            self.craft_weapon_copper_dagger(recycle=True)
+            self.craft_weapon_apprentice_gloves(recycle=True)
+            self.craft_weapon_fishing_net(recycle=True)
+
+
+    def craft_all_gear(self):
+        """
+        Goes through all gear recipes and crafts all items
+        Starting with the highest level requirement recipes
+        """
+        self.get_skills_lvl()
+
+        #Lv1-4 Recipes
+        if self.gearcrafting < 5:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Crafting Lv1-4 gear..", "magenta"))
+            self.craft_gear_copper_boots(recycle=True)
+            self.craft_gear_wooden_shield(recycle=True)
+
+        # Lv5-10 Recipes
+        if 4 < self.gearcrafting < 10:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Crafting Lv5-10 gear..", "magenta"))
+            self.craft_gear_copper_armor(recycle=True)
 
 
     def craft_copper_bars(self):
@@ -418,19 +448,69 @@ class Player:
         earth_boost_potion_recipe = [("sunflower", 33), ("yellow_slimeball", 33), ("algae", 33)]
         self.craft_loop(self.ws_alchemy_coords, earth_boost_potion_recipe, "earth_boost_potion", 33)
 
-    def craft_weapon_copper_dagger(self):
+    def craft_weapon_copper_dagger(self, recycle=False):
         """
-        Crafting small HP Potion in the Alchemy Workshop (2, 3)
-        Only crafting when levels 1-4, else aborting
+        Crafting Copper Daggers in the Weaponcrafting Workshop (2, 1)
+        Should only be crafted at levels 1-4
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Copper Daggers...", "magenta"))
-        copper_dagger_recipe = [("copper_bar", 60)]
-        self.craft_loop(self.ws_weaponcrafting_coords, copper_dagger_recipe, "copper_dagger", 10)
+        copper_dagger_recipe = [("copper_bar", 90)]
+        self.craft_loop(self.ws_weaponcrafting_coords, copper_dagger_recipe, "copper_dagger", 15, recycle=recycle)
 
-
-    def craft_loop(self, ws_coords, inputs, output, output_qty):
+    def craft_weapon_apprentice_gloves(self, recycle=False):
         """
+        Crafting Apprentice Gloves in the Weaponcrafting Workshop (2, 1)
+        Should only be crafted at levels 1-4
+        Stop when withdrawing materials from bank doesnt work
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Apprentice Gloves...", "magenta"))
+        apprentive_gloves_recipe = [("feather", 90)]
+        self.craft_loop(self.ws_weaponcrafting_coords, apprentive_gloves_recipe, "apprentice_gloves", 15, recycle=recycle)
+
+    def craft_weapon_fishing_net(self, recycle=False):
+        """
+        Crafting Fishing Net in the Weaponcrafting Workshop (2, 1)
+        Should only be crafted at levels 1-4
+        Stop when withdrawing materials from bank doesnt work
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Fishing Net...", "magenta"))
+        fishing_net_recipe = [("ash_plank", 90)]
+        self.craft_loop(self.ws_weaponcrafting_coords, fishing_net_recipe, "fishing_net", 15, recycle=recycle)
+
+    def craft_gear_copper_boots(self, recycle=False):
+        """
+        Crafting Copper Boots in the Gearcrafting Workshop (3, 1)
+        Should only be crafted at levels 1-4
+        Stop when withdrawing materials from bank doesnt work
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Copper Boots...", "magenta"))
+        copper_boots_recipe = [("copper_bar", 80)]
+        self.craft_loop(self.ws_gearcrafting_coords, copper_boots_recipe, "copper_boots", 10, recycle=recycle)
+
+    def craft_gear_wooden_shield(self, recycle=False):
+        """
+        Crafting Wooden Shields in the Gearcrafting Workshop (3, 1)
+        Should only be crafted at levels 1-4
+        Stop when withdrawing materials from bank doesnt work
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Wooden Shields...", "magenta"))
+        wooden_shield_recipe = [("ash_plank", 90)]
+        self.craft_loop(self.ws_gearcrafting_coords, wooden_shield_recipe, "wooden_shield", 15, recycle=recycle)
+
+    def craft_gear_copper_armor(self, recycle=False):
+        """
+        Crafting Copper Armors in the Gearcrafting Workshop (3, 1)
+        Should only be crafted at levels 5-10
+        Stop when withdrawing materials from bank doesnt work
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Copper Armors...", "magenta"))
+        copper_armor_recipe = [("copper_bar", 75), ("wool", 25)]
+        self.craft_loop(self.ws_gearcrafting_coords, copper_armor_recipe, "copper_armor", 15, recycle=recycle)
+
+    def craft_loop(self, ws_coords, inputs, output, output_qty, recycle=False):
+        """
+        :param recycle: if ``true`` , immediately recycle items after crafting them
         :param ws_coords: workshop coordinates to craft at
         :param inputs: list of tuples (item_code, qty)
         :param output: output item code
@@ -452,6 +532,8 @@ class Player:
 
             self.move(*ws_coords)
             self.craft(output, output_qty)
+            if recycle:
+                self.recycle(output, output_qty)
 
     def get_skills_lvl(self):
         data = self.get_character_data()
@@ -482,7 +564,7 @@ class Player:
 if __name__ == '__main__':
     pass
     BlueMaiden = Player("BlueMaiden")
-    BlueMaiden.test_recycle("wooden_staff", 5)
+    BlueMaiden.recycle("copper_dagger", 1)
     # move("BlueMaiden", 0, 1)
     # fight("BlueMaiden")
     # rest("BlueMaiden")
