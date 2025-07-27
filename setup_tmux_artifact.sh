@@ -3,7 +3,7 @@ SESSION="artifact"
 tmux new-session -d -s $SESSION
 
 declare -a PLAYERS=("BlueMaiden" "WoodenMaiden" "MiningMaiden" "FishMaiden" "AlchMaiden")
-ACTIONS=("fight" "gather" "gather" "gather" "gather")
+ACTIONS=("fight" "gather" "gather" "gather" "alchemy")
 COORDS=("(1, -2)" "(1, 9)" "(1, 7)" "(5, 2)" "(2, 2)")
 
 for i in "${!PLAYERS[@]}"; do
@@ -41,5 +41,6 @@ done
 # (Lv10) wood: spruce tree: (1, 9)
 # (Lv20) wood: birch tree: (-1, 6)
 # (Lv30) wood: dead tree: (9, 8)
+# (Lv35) wood: magic tree: (3, 11)
 # (Lv40) wood: maple tree: (4, 14)
 

@@ -12,6 +12,8 @@ class Player:
         self.bank_coords = (4, 1)
         self.ws_mining_coords = (1, 5)
         self.ws_woodcutting_coords = (-2, -3)
+        self.ws_cooking_coords = (1, 1)
+        self.ws_alchemy_coords = (2, 3)
 
     def get_api_token(self):
         with open("secret.txt") as file:
@@ -232,28 +234,55 @@ class Player:
         Craft copper bars in the Mining Workshop (1, 5)
         Stop when withdrawing copper ore from bank doesnt work
         """
-        while True:
-            self.move(*self.bank_coords)
-            self.deposit()
-            # if the withdraw fails, theres no more copper and we can stop
-            if not self.withdraw("copper_ore", 100):
-                break
-            self.move(*self.ws_mining_coords)
-            self.craft("copper_bar", 10)
+        self.craft_loop(self.ws_mining_coords, "copper_ore", 100, "copper_bar", 10)
 
     def craft_ash_planks(self):
         """
-        Craft copper bars in the Mining Workshop (1, 5)
-        Stop when withdrawing copper ore from bank doesnt work
+        Craft copper bars in the Woodcutting Workshop (-2, -3)
+        Stop when withdrawing ash wood from bank doesnt work
+        """
+        self.craft_loop(self.ws_woodcutting_coords, "ash_wood", 100, "ash_plank", 10)
+
+    def craft_cooked_gudgeon(self):
+        """
+        Cook gudgeon fish in the Cooking Workshop (1, 1)
+        Stop when withdrawing gudgeon fish from bank doesnt work
+        """
+        self.craft_loop(self.ws_woodcutting_coords, "gudgeon", 100, "cooked_gudgeon", 100)
+
+    def craft_cooked_chicken(self):
+        """
+        Cook chicken in the Cooking Workshop (1, 1)
+        Stop when withdrawing chicken from bank doesnt work
+        """
+        self.craft_loop(self.ws_woodcutting_coords, "raw_chicken", 100, "cooked_chicken", 100 )
+
+    def craft_small_hp_potion(self):
+        """
+        Crafting small HP Potion in the Alchemy Workshop (2, 3)
+        Needs appropriate Alchemy Gathering level 5+
+        Stop when withdrawing chicken from bank doesnt work
+        """
+        self.craft_loop(self.ws_alchemy_coords, "raw_chicken", 100, "cooked_chicken", 100)
+
+    def craft_loop(self, ws_coords, input, input_qty, output, output_qty):
+        """
+        :param ws_coords: workshop coordinates to craft at
+        :param input: must be correct item codes
+        :param input_qty:
+        :param output: must be correct item codes
+        :param output_qty:
         """
         while True:
             self.move(*self.bank_coords)
             self.deposit()
-            # if the withdraw fails, theres no more wood and we can stop
-            if not self.withdraw("ash_wood", 100):
+            # if the withdraw fails, theres no more materials and we can stop
+            if not self.withdraw(input, input_qty):
                 break
-            self.move(*self.ws_woodcutting_coords)
-            self.craft("ash_plank", 10)
+            self.move(*ws_coords)
+            self.craft(output, output_qty)
+
+
 
 
 if __name__ == '__main__':
