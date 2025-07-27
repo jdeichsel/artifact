@@ -1,10 +1,12 @@
 import json
 import time
 import requests
+from colorama import init, Fore, Style
 
 
 class Player:
     def __init__(self, name):
+        init()  # for colored cmd prints
         self.SERVER_URL = "https://api.artifactsmmo.com"
         self.API_TOKEN = self.get_api_token()
         self.name = name
@@ -15,6 +17,32 @@ class Player:
         self.ws_woodcutting_coords = (-2, -3)
         self.ws_cooking_coords = (1, 1)
         self.ws_alchemy_coords = (2, 3)
+
+    @staticmethod
+    def color_text(text, color):
+        """
+        Returns a string wrapped for a specific color
+        Possible colors: ``red``, ``green``, ``yellow``, ``blue``, ``magenta``,``cyan``
+        :param text: input text
+        :return: same text wrapped around with color operators
+        """
+
+        if color == "red":
+            return Fore.RED + text + Style.RESET_ALL
+        elif color == "green":
+            return Fore.GREEN + text + Style.RESET_ALL
+        elif color == "yellow":
+            return Fore.YELLOW + text + Style.RESET_ALL
+        elif color == "blue":
+            return Fore.BLUE + text + Style.RESET_ALL
+        elif color == "magenta":
+            return Fore.MAGENTA + text + Style.RESET_ALL
+        elif color == "cyan":
+            return Fore.CYAN + text + Style.RESET_ALL
+        else:
+            print(Fore.RED + f"Invalid color: {color}" + Style.RESET_ALL)
+            return text
+
 
     def get_api_token(self):
         with open("secret.txt") as file:
@@ -87,7 +115,7 @@ class Player:
                 self.rest()
                 self.move(*self.coords)
         except KeyError:
-            print(f"[{self.name}]: Could not find data, likely a start-up error")
+            print(f"[{self.name}]: " + self.color_text("Could not find data, likely a start-up error", "red"))
 
     def get_inventory_list(self):
         """
@@ -96,6 +124,7 @@ class Player:
         """
         character_data = self.get_character_data()
 
+        inventory = None
         for character in character_data.get("data", []):
             if character.get("name") == self.name:
                 inventory = character.get("inventory", [])
@@ -124,11 +153,11 @@ class Player:
         response = requests.post(url, headers=headers, data=json_body)
         if response.status_code <= 200:
             data = response.json()
-            print(f"[{self.name}]: Withdrawing {amount}x {item}")
+            print(f"[{self.name}]: " + self.color_text(f"Withdrawing {amount}x {item}", "cyan"))
             self.cooldown_timer(data)
             return True
         else:
-            print(f"[{self.name}]: No more {item} in bank!")
+            print(f"[{self.name}]: " + self.color_text(f"Failed to withdraw {amount}x {item}", "red"))
             return False
 
     def deposit(self):
@@ -142,7 +171,7 @@ class Player:
 
         response = requests.post(url, headers=headers, data=inventory)
         data = response.json()
-        print(f"[{self.name}]: Dumping inventory")
+        print(f"[{self.name}]: " + self.color_text(f"Dumping inventory", "cyan"))
         self.cooldown_timer(data)
 
 
@@ -157,11 +186,11 @@ class Player:
         response = requests.post(url, headers=headers, data=json_body)
         if response.status_code <= 200:
             data = response.json()
-            print(f"[{self.name}]: Crafting {amount}x {item}")
+            print(f"[{self.name}]: " + self.color_text(f"Crafting {amount}x {item}", "yellow"))
             self.cooldown_timer(data)
             return True
         else:
-            print(f"[{self.name}]: Bad State! [{response.status_code}] {response.text}")
+            print(f"[{self.name}]: " + self.color_text(f"Bad Crafting! [{response.status_code}] {response.text}", "red"))
             return False
 
     def move(self, x, y):
@@ -217,7 +246,7 @@ class Player:
         try:
             cooldown = data["data"]["cooldown"]["total_seconds"]
         except KeyError:
-            print(f"[{self.name}] [{data['error']['code']}]: {data['error']['message']}")
+            print(f"[{self.name}]: " + self.color_text(f"[{data['error']['code']}]: {data['error']['message']}", "red"))
             return
 
         time.sleep(cooldown)
