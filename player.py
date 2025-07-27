@@ -161,7 +161,7 @@ class Player:
             self.cooldown_timer(data)
             return True
         else:
-            print(f"[{self.name}]: Cannot craft! Bad state!")
+            print(f"[{self.name}]: Bad State! [{response.status_code}] {response.text}")
             return False
 
     def move(self, x, y):
