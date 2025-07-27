@@ -3,26 +3,6 @@ import player
 import argparse
 
 
-def crafting_alchemy(player):
-    print(f"[{player.name}] Starting to craft all alchemy items")
-    player.craft_all_potions()
-
-
-def crafting_mining(player):
-    print(f"[{player.name}] Starting to craft all mining items")
-    player.craft_all_bars()
-
-
-def crafting_wood(player):
-    print(f"[{player.name}] Starting to craft all wood items")
-    player.craft_all_planks()
-
-
-def crafting_fishing(player):
-    print(f"[{player.name}] Starting to craft all fishing items")
-    player.craft_all_food()
-
-
 def fighting(player):
     print(f"[{player.name}] Starting to fight")
     player.fight_loop()
@@ -54,16 +34,12 @@ if __name__ == '__main__':
     if args.action == "fight":
         fighting(player)
     elif args.action == "mining":
-        crafting_mining(player)
         gathering(player)
     elif args.action == "wood":
-        crafting_wood(player)
         gathering(player)
     elif args.action == "fishing":
-        crafting_fishing(player)
         gathering(player)
     elif args.action == "alchemy":
-        crafting_alchemy(player)
         gathering(player)
     else:
         print("Invalid action")
