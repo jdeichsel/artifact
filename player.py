@@ -343,8 +343,12 @@ class Player:
         Starting with the highest level requirement, as the small HP potion eats all sunflowers
         :return:
         """
-        self.craft_earth_boost_potion()
-        self.craft_small_hp_potion()
+        self.get_skills_lvl()
+
+        if self.alchemy <= 20:
+            self.craft_earth_boost_potion()
+        if self.alchemy <= 15:
+            self.craft_small_hp_potion()
 
     def craft_all_weapons(self):
         """
