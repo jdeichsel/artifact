@@ -570,15 +570,25 @@ class Player:
 
     def get_skills_lvl(self):
         data = self.get_character_data()
-        combat = data["data"][0]["level"]
-        mining = data["data"][0]["mining_level"]
-        woodcutting = data["data"][0]["woodcutting_level"]
-        fishing = data["data"][0]["fishing_level"]
-        weaponcrafting = data["data"][0]["weaponcrafting_level"]
-        gearcrafting = data["data"][0]["gearcrafting_level"]
-        jewelrycrafting = data["data"][0]["jewelrycrafting_level"]
-        cooking = data["data"][0]["cooking_level"]
-        alchemy = data["data"][0]["alchemy_level"]
+
+        # Find the JSON object with the character name and get all the attributes
+        combat, mining, woodcutting, fishing, weaponcrafting, gearcrafting, jewelrycrafting, cooking, alchemy = (None,) * 9
+
+        for character in data['data']:
+            if character.get('name') == self.name:
+                combat = character.get('level')
+                mining = character.get('mining_level')
+                woodcutting = character.get('woodcutting_level')
+                fishing = character.get('fishing_level')
+                weaponcrafting = character.get('weaponcrafting_level')
+                gearcrafting = character.get('gearcrafting_level')
+                jewelrycrafting = character.get('jewelrycrafting_level')
+                cooking = character.get('cooking_level')
+                alchemy = character.get('alchemy_level')
+                break
+
+
+
 
         self.combat = combat
         self.mining = mining
