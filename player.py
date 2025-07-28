@@ -207,7 +207,7 @@ class Player:
         response = requests.post(url, headers=headers, data=json_body)
         if response.status_code <= 200:
             data = response.json()
-            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Crafting {amount}x {item}", "yellow"))
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Crafted {amount}x {item}", "yellow"))
             self.cooldown_timer(data)
             return True
         else:
@@ -290,7 +290,10 @@ class Player:
         try:
             cooldown = data["data"]["cooldown"]["total_seconds"]
         except KeyError:
-            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Cooldown Timer Error! [{data['error']['code']}]: {data['error']['message']}", "red"))
+            # don't report the "already at destination" error, not important
+            if data['error']['code'] == 490:
+                return
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Cooldown Timer Error: [{data['error']['code']}]: {data['error']['message']}", "red"))
             return
 
         time.sleep(cooldown)
@@ -326,6 +329,7 @@ class Player:
         Cycles through all available recipes and crafts all items
         Any order is okay, no overlaps
         """
+
         self.craft_copper_bars()
         self.craft_iron_bars()
 
@@ -334,8 +338,16 @@ class Player:
         Cycles through all available recipes and crafts all items
         Any order is okay, only very small overlaps
         """
-        self.craft_cooked_chicken()
-        self.craft_cooked_gudgeon()
+        self.get_skills_lvl()
+
+        if self.cooking <= 11:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Cooking Level {self.cooking}: Crafting Lv1-11 Food..", "magenta"))
+            self.craft_cooked_chicken()
+            self.craft_cooked_gudgeon()
+
+        if self.cooking <= 20:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Cooking Level {self.cooking}: Crafting Lv10-20 Food..", "magenta"))
+            self.craft_cooked_shrimp()
 
     def craft_all_potions(self):
         """
@@ -346,8 +358,10 @@ class Player:
         self.get_skills_lvl()
 
         if self.alchemy <= 20:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Alchemy Level {self.alchemy}: Crafting Earth Boost Potions..", "magenta"))
             self.craft_earth_boost_potion()
         if self.alchemy <= 15:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Alchemy Level {self.alchemy}: Crafting Small HP Potions..", "magenta"))
             self.craft_small_hp_potion()
 
     def craft_all_weapons(self):
@@ -359,7 +373,7 @@ class Player:
 
         # Lv1-4 Recipes
         if self.weaponcrafting < 5:
-            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Crafting Lv1-4 weapons..", "magenta"))
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Weaponcrafting Level {self.weaponcrafting}: Crafting Weapons..", "magenta"))
             self.craft_weapon_copper_dagger(recycle=True)
             self.craft_weapon_apprentice_gloves(recycle=True)
             self.craft_weapon_fishing_net(recycle=True)
@@ -437,6 +451,15 @@ class Player:
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Cooked Chicken...", "magenta"))
         cooked_chicken_recipe = [("raw_chicken", 100)]
         self.craft_loop(self.ws_cooking_coords, cooked_chicken_recipe, "cooked_chicken", 100 )
+
+    def craft_cooked_shrimp(self):
+        """
+        Cook shrimps in the Cooking Workshop (1, 1)
+        Stop when withdrawing materials from bank doesnt work
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Cooked Shrimp...", "magenta"))
+        cooked_shrimp_recipe = [("shrimp", 100)]
+        self.craft_loop(self.ws_cooking_coords, cooked_shrimp_recipe, "cooked_shrimp", 100)
 
     def craft_small_hp_potion(self):
         """
@@ -541,8 +564,8 @@ class Player:
                 break
 
             self.move(*ws_coords)
-            self.craft(output, output_qty)
-            if recycle:
+            # craft returns True on success
+            if self.craft(output, output_qty) and recycle:
                 self.recycle(output, output_qty)
 
     def get_skills_lvl(self):
