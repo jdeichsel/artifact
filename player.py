@@ -349,13 +349,17 @@ class Player:
             self.craft_cooked_chicken()
             self.craft_cooked_gudgeon()
 
-        if self.cooking <= 20:
+        if 10 <= self.cooking <= 20:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Cooking Level {self.cooking}: Crafting Lv10-20 Food..", "magenta"))
             self.craft_cooked_shrimp()
 
+        if 20 <= self.cooking <= 30:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Cooking Level {self.cooking}: Crafting Lv20-30 Food..", "magenta"))
+            self.craft_cooked_trout()
+
     def craft_all_potions(self):
         """
-        Cycles through all available recipes and crafts all items
+        Cycles through all available recipes and crafts all items.
         Starting with the highest level requirement, as the small HP potion eats all sunflowers
         :return:
         """
@@ -370,7 +374,7 @@ class Player:
 
     def craft_all_weapons(self):
         """
-        Goes through all weapon recipes and crafts all items
+        Goes through all weapon recipes and crafts all items.
         Starting with the highest level requirement recipes
         """
         self.get_skills_lvl()
@@ -385,7 +389,7 @@ class Player:
 
     def craft_all_gear(self):
         """
-        Goes through all gear recipes and crafts all items
+        Goes through all gear recipes and crafts all items.
         Starting with the highest level requirement recipes
         """
         self.get_skills_lvl()
@@ -404,7 +408,7 @@ class Player:
 
     def craft_copper_bars(self):
         """
-        Craft copper bars in the Mining Workshop (1, 5)
+        Craft copper bars in the Mining Workshop (1, 5).
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft copper bars...", "magenta"))
@@ -422,7 +426,7 @@ class Player:
 
     def craft_ash_planks(self):
         """
-        Craft ash planks in the Woodcutting Workshop (-2, -3)
+        Craft ash planks in the Woodcutting Workshop (-2, -3).
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft ash planks...", "magenta"))
@@ -431,7 +435,7 @@ class Player:
 
     def craft_spruce_planks(self):
         """
-        Craft spruce planks in the Woodcutting Workshop (-2, -3)
+        Craft spruce planks in the Woodcutting Workshop (-2, -3).
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Spruce Planks...", "magenta"))
@@ -440,7 +444,7 @@ class Player:
 
     def craft_cooked_gudgeon(self):
         """
-        Cook gudgeon fish in the Cooking Workshop (1, 1)
+        Cook gudgeon fish in the Cooking Workshop (1, 1).
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Cooked Gudgeon...", "magenta"))
@@ -449,7 +453,7 @@ class Player:
 
     def craft_cooked_chicken(self):
         """
-        Cook chicken in the Cooking Workshop (1, 1)
+        Cook chicken in the Cooking Workshop (1, 1).
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Cooked Chicken...", "magenta"))
@@ -458,17 +462,26 @@ class Player:
 
     def craft_cooked_shrimp(self):
         """
-        Cook shrimps in the Cooking Workshop (1, 1)
+        Cook shrimps in the Cooking Workshop (1, 1).
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Cooked Shrimp...", "magenta"))
         cooked_shrimp_recipe = [("shrimp", 100)]
         self.craft_loop(self.ws_cooking_coords, cooked_shrimp_recipe, "cooked_shrimp", 100)
 
+    def craft_cooked_trout(self):
+        """
+        Cook Trouts in the Cooking Workshop (1, 1).
+        Stop when withdrawing materials from bank doesnt work
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Cooked Trout...", "magenta"))
+        cooked_trout_recipe = [("trout", 100)]
+        self.craft_loop(self.ws_cooking_coords, cooked_trout_recipe, "cooked_trout", 100)
+
     def craft_small_hp_potion(self):
         """
-        Crafting small HP Potion in the Alchemy Workshop (2, 3)
-        Needs appropriate Alchemy Gathering level 5+
+        Crafting small HP Potion in the Alchemy Workshop (2, 3).
+        Needs appropriate Alchemy Gathering level 5+.
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Small HP Potions...", "magenta"))
@@ -477,8 +490,8 @@ class Player:
 
     def craft_earth_boost_potion(self):
         """
-        Crafting small HP Potion in the Alchemy Workshop (2, 3)
-        Needs appropriate Alchemy Gathering level 10+
+        Crafting small HP Potion in the Alchemy Workshop (2, 3).
+        Needs appropriate Alchemy Gathering level 10+.
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Earth Boost Potions...", "magenta"))
@@ -487,8 +500,8 @@ class Player:
 
     def craft_weapon_copper_dagger(self, recycle=False):
         """
-        Crafting Copper Daggers in the Weaponcrafting Workshop (2, 1)
-        Should only be crafted at levels 1-4
+        Crafting Copper Daggers in the Weaponcrafting Workshop (2, 1).
+        Should only be crafted at levels 1-4.
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Copper Daggers...", "magenta"))
@@ -497,8 +510,8 @@ class Player:
 
     def craft_weapon_apprentice_gloves(self, recycle=False):
         """
-        Crafting Apprentice Gloves in the Weaponcrafting Workshop (2, 1)
-        Should only be crafted at levels 1-4
+        Crafting Apprentice Gloves in the Weaponcrafting Workshop (2, 1).
+        Should only be crafted at levels 1-4.
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Apprentice Gloves...", "magenta"))
@@ -507,8 +520,8 @@ class Player:
 
     def craft_weapon_fishing_net(self, recycle=False):
         """
-        Crafting Fishing Net in the Weaponcrafting Workshop (2, 1)
-        Should only be crafted at levels 1-4
+        Crafting Fishing Net in the Weaponcrafting Workshop (2, 1).
+        Should only be crafted at levels 1-4.
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Fishing Net...", "magenta"))
@@ -517,8 +530,8 @@ class Player:
 
     def craft_gear_copper_boots(self, recycle=False):
         """
-        Crafting Copper Boots in the Gearcrafting Workshop (3, 1)
-        Should only be crafted at levels 1-4
+        Crafting Copper Boots in the Gearcrafting Workshop (3, 1).
+        Should only be crafted at levels 1-4.
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Copper Boots...", "magenta"))
@@ -527,8 +540,8 @@ class Player:
 
     def craft_gear_wooden_shield(self, recycle=False):
         """
-        Crafting Wooden Shields in the Gearcrafting Workshop (3, 1)
-        Should only be crafted at levels 1-4
+        Crafting Wooden Shields in the Gearcrafting Workshop (3, 1).
+        Should only be crafted at levels 1-4.
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Wooden Shields...", "magenta"))
@@ -537,8 +550,8 @@ class Player:
 
     def craft_gear_copper_armor(self, recycle=False):
         """
-        Crafting Copper Armors in the Gearcrafting Workshop (3, 1)
-        Should only be crafted at levels 5-10
+        Crafting Copper Armors in the Gearcrafting Workshop (3, 1).
+        Should only be crafted at levels 5-10.
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Copper Armors...", "magenta"))
@@ -573,6 +586,11 @@ class Player:
                 self.recycle(output, output_qty)
 
     def get_skills_lvl(self):
+        """
+        Pulls character data.
+        Updates all skill levels of current player
+        :return:
+        """
         data = self.get_character_data()
 
         # Find the JSON object with the character name and get all the attributes
@@ -610,8 +628,8 @@ class Player:
 
 if __name__ == '__main__':
     pass
-    BlueMaiden = Player("BlueMaiden")
-    BlueMaiden.recycle("copper_dagger", 1)
+    # BlueMaiden = Player("BlueMaiden")
+    # BlueMaiden.recycle("copper_dagger", 1)
     # move("BlueMaiden", 0, 1)
     # fight("BlueMaiden")
     # rest("BlueMaiden")
