@@ -176,7 +176,7 @@ class Player:
         if response.status_code <= 200:
             data = response.json()
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Withdrawing {amount}x {item}", "cyan"))
-            self.cooldown_timer(data)
+            self.cooldown_timer(data, action="withdraw")
             return True
         else:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Failed to withdraw {amount}x {item}", "red"))
@@ -194,7 +194,7 @@ class Player:
         response = requests.post(url, headers=headers, data=inventory)
         data = response.json()
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Dumping inventory", "cyan"))
-        self.cooldown_timer(data)
+        self.cooldown_timer(data, action="deposit")
 
     def craft(self, item, amount):
         """
@@ -208,7 +208,7 @@ class Player:
         if response.status_code <= 200:
             data = response.json()
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Crafted {amount}x {item}", "yellow"))
-            self.cooldown_timer(data)
+            self.cooldown_timer(data, action="craft")
             return True
         else:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Bad Crafting! [{response.status_code}] {response.text}", "red"))
@@ -227,7 +227,7 @@ class Player:
         if response.status_code <= 200:
             data = response.json()
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Recycling {amount}x {item}", "yellow"))
-            self.cooldown_timer(data)
+            self.cooldown_timer(data, action="recycle")
         else:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Bad Recycling! [{response.status_code}] {response.text}", "red"))
 
@@ -248,7 +248,7 @@ class Player:
             response = requests.post(url, headers=headers, json=json_body)
 
         data = response.json()
-        self.cooldown_timer(data)
+        self.cooldown_timer(data, action="move")
 
     def fight(self):
         """
@@ -259,7 +259,7 @@ class Player:
         response = requests.post(url, headers=headers)
         data = response.json()
 
-        self.cooldown_timer(data)
+        self.cooldown_timer(data, action="fight")
         self.check_banking(response)
         self.check_loss(data)
 
@@ -280,9 +280,9 @@ class Player:
         url, headers = self.get_post_request("rest")
         response = requests.post(url, headers=headers)
         data = response.json()
-        self.cooldown_timer(data)
+        self.cooldown_timer(data, action="rest")
 
-    def cooldown_timer(self, data):
+    def cooldown_timer(self, data, action="None"):
         """
         Receive JSON response data and wait for its cooldown
         :param data of requests.response:
@@ -290,9 +290,13 @@ class Player:
         try:
             cooldown = data["data"]["cooldown"]["total_seconds"]
         except KeyError:
-            # don't report the "already at destination" error, not important
-            if data['error']['code'] == 490:
+            # don't report "already at destination" when moving
+            if data['error']['code'] == 490 and action == "move":
                 return
+            # don't report "trying to deposit when inventory empty"
+            if data['error']['code'] == 478 and action == "deposit":
+                return
+
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Cooldown Timer Error: [{data['error']['code']}]: {data['error']['message']}", "red"))
             return
 
@@ -305,7 +309,7 @@ class Player:
         url, headers = self.get_post_request("gathering")
         response = requests.post(url, headers=headers)
         data = response.json()
-        self.cooldown_timer(data)
+        self.cooldown_timer(data, action="gather")
         self.check_banking(response)
 
     def gather_loop(self):
