@@ -122,6 +122,23 @@ class Player:
                 return item["quantity"]
         return 0
 
+    def calculate_iron_coal_ratio(self):
+        """
+        Check which of the two has less quantity and needs more.
+        Updates gathering coords of player.
+        Should only be called in check banking handler!
+        :return:
+        """
+        iron_ore, coal = self.get_quantity_of_bank_item("iron_ore"), self.get_quantity_of_bank_item("coal")
+        if iron_ore // 3 > coal // 7:
+            next_mining = "coal"
+            self.coords = (1, 6)
+        else:
+            next_mining = "iron_ore"
+            self.coords = (1, 7)
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"{iron_ore}x iron ore, {coal}x coal => Mining {next_mining} next", "yellow"))
+
+
     def check_banking(self, response):
         """
         If response code 497, player has a full inventory and needs to deposit.
@@ -133,12 +150,21 @@ class Player:
 
             if self.role == "mining":
                 self.craft_all_bars()
+
+                # keep a ratio of 3 iron : 7 coal in the bank to craft iron bars
+                self.get_skills_lvl()
+                if 10 <= self.mining <= 20:
+                    self.calculate_iron_coal_ratio()
+
             elif self.role == "wood":
                 self.craft_all_planks()
+
             elif self.role == "fishing":
                 self.craft_all_food()
+
             elif self.role == "alchemy":
                 self.craft_all_potions()
+
             elif self.role == "fight":
                 self.craft_all_gear()
 
@@ -369,11 +395,24 @@ class Player:
     def craft_all_bars(self):
         """
         Cycles through all available recipes and crafts all items
-        Any order is okay, no overlaps
+        Starting with the highest level requirement, as the small HP potion eats all sunflowers
         """
 
-        self.craft_copper_bars()
-        self.craft_iron_bars()
+        self.get_skills_lvl()
+
+        if 20 <= self.mining <= 30:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Mining Level {self.mining}: Crafting Lv20-30 Bars..", "magenta"))
+            self.craft_steel_bars()
+
+        if 10 <= self.mining <= 20:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Mining Level {self.mining}: Crafting Lv10-20 Bars..", "magenta"))
+            self.craft_iron_bars()
+
+        if self.mining <= 10:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Mining Level {self.mining}: Crafting Lv1-11 Bars..", "magenta"))
+            self.craft_copper_bars()
+
+
 
     def craft_all_food(self):
         """
@@ -478,6 +517,14 @@ class Player:
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft iron bars...", "magenta"))
         iron_bars_recipe = [("iron_ore", 100)]
         self.craft_loop(self.ws_mining_coords, iron_bars_recipe, "iron_bar", 10)
+
+    def craft_steel_bars(self):
+        """
+        Craft steel bars in the Mining Workshop (1, 5)
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft steel bars...", "magenta"))
+        steel_bars_recipe = [("iron_ore", 30), ("coal", 70)]
+        self.craft_loop(self.ws_mining_coords, steel_bars_recipe, "steel_bar", 10)
 
     def craft_ash_planks(self):
         """
@@ -624,7 +671,7 @@ class Player:
                 self.withdraw_recipe(recipe)
 
             self.move(*ws_coords)
-            # craft returns True on success
+            # craft() returns True on success
             if self.craft(output, output_qty) and recycle:
                 self.recycle(output, output_qty)
 
@@ -670,7 +717,7 @@ if __name__ == '__main__':
     pass
     BlueMaiden = Player("BlueMaiden")
     recipe = [("iron_ore", 55), ("yellow_slimeball", 24)]
-    BlueMaiden.deposit()
+    BlueMaiden.calculate_iron_coal_ratio()
 
 
 
