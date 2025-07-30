@@ -106,6 +106,22 @@ class Player:
         data = response.json()
         return data
 
+    def get_bank_items(self):
+        url, headers = self.get_get_request("bank/items")
+
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        return data
+
+    def get_quantity_of_bank_item(self, item_code):
+        bank_data = self.get_bank_items()
+        item_list = bank_data['data']
+
+        for item in item_list:
+            if item["code"] == item_code:
+                return item["quantity"]
+        return 0
+
     def check_banking(self, response):
         """
         If response code 497, player has a full inventory and needs to deposit.
@@ -180,6 +196,28 @@ class Player:
             return True
         else:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Failed to withdraw {amount}x {item}", "red"))
+            return False
+
+    def withdraw_recipe(self, recipe):
+        """
+        Withdraws every item of a recipe or list with the given quantity
+        :param recipe: List of tuples
+        :return:
+        """
+        # convert recipe list to JSON
+        recipe_json = [{"code": code, "quantity": qty} for code, qty in recipe]
+
+        url, headers = self.get_post_request("bank/withdraw/item")
+        json_body = json.dumps(recipe_json)
+
+        response = requests.post(url, headers=headers, data=json_body)
+        if response.status_code <= 200:
+            data = response.json()
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Withdrawing recipe", "cyan"))
+            self.cooldown_timer(data, action="withdraw")
+            return True
+        else:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Failed to withdraw recipe", "red"))
             return False
 
     def deposit(self):
@@ -406,20 +444,36 @@ class Player:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Crafting Lv5-10 gear..", "magenta"))
             self.craft_gear_copper_armor(recycle=True)
 
+    def check_recipe_craftable(self, recipe):
+        """
+        Receives a recipe object and checks if the bank contains the items to make the recipe
+        :param recipe: List of tuples (item_code, qty)
+        :return: ``True`` if the bank contains the items to make the recipe
+        """
+        all_items_available = True
+        for recipe_item in recipe:
+            if self.get_quantity_of_bank_item(recipe_item[0]) < recipe_item[1]:
+                all_items_available = False
+                print(f"[{self.name}][{self.time()}]: " + self.color_text(
+                    f"Did NOT find {recipe_item[1]}x {recipe_item[0]} in bank.", "red"))
+            else:
+                print(f"[{self.name}][{self.time()}]: " + self.color_text(
+                    f"Found at least {recipe_item[1]}x {recipe_item[0]} in bank.", "green"))
+
+        return all_items_available
 
     def craft_copper_bars(self):
         """
         Craft copper bars in the Mining Workshop (1, 5).
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft copper bars...", "magenta"))
         copper_bars_recipe = [("copper_ore", 100)]
-        self.craft_loop(self.ws_mining_coords, copper_bars_recipe, "copper_bar", 10)
+        if self.check_recipe_craftable(copper_bars_recipe):
+            self.craft_loop(self.ws_mining_coords, copper_bars_recipe, "copper_bar", 10)
 
     def craft_iron_bars(self):
         """
         Craft iron bars in the Mining Workshop (1, 5)
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft iron bars...", "magenta"))
         iron_bars_recipe = [("iron_ore", 100)]
@@ -428,7 +482,6 @@ class Player:
     def craft_ash_planks(self):
         """
         Craft ash planks in the Woodcutting Workshop (-2, -3).
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft ash planks...", "magenta"))
         ash_planks_recipe = [("ash_wood", 100)]
@@ -437,7 +490,6 @@ class Player:
     def craft_spruce_planks(self):
         """
         Craft spruce planks in the Woodcutting Workshop (-2, -3).
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Spruce Planks...", "magenta"))
         spruce_planks_recipe = [("spruce_wood", 100)]
@@ -446,7 +498,6 @@ class Player:
     def craft_cooked_gudgeon(self):
         """
         Cook gudgeon fish in the Cooking Workshop (1, 1).
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Cooked Gudgeon...", "magenta"))
         cooked_gudgeon_recipe = [("gudgeon", 100)]
@@ -455,7 +506,6 @@ class Player:
     def craft_cooked_chicken(self):
         """
         Cook chicken in the Cooking Workshop (1, 1).
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Cooked Chicken...", "magenta"))
         cooked_chicken_recipe = [("raw_chicken", 100)]
@@ -464,7 +514,6 @@ class Player:
     def craft_cooked_shrimp(self):
         """
         Cook shrimps in the Cooking Workshop (1, 1).
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Cooked Shrimp...", "magenta"))
         cooked_shrimp_recipe = [("shrimp", 100)]
@@ -473,7 +522,6 @@ class Player:
     def craft_cooked_trout(self):
         """
         Cook Trouts in the Cooking Workshop (1, 1).
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Cooked Trout...", "magenta"))
         cooked_trout_recipe = [("trout", 100)]
@@ -483,7 +531,6 @@ class Player:
         """
         Crafting small HP Potion in the Alchemy Workshop (2, 3).
         Needs appropriate Alchemy Gathering level 5+.
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Small HP Potions...", "magenta"))
         small_hp_potion_recipe = [("sunflower", 99)]
@@ -493,7 +540,6 @@ class Player:
         """
         Crafting Earth Boost Potion in the Alchemy Workshop (2, 3).
         Needs appropriate Alchemy Gathering level 10+.
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Earth Boost Potions...", "magenta"))
         earth_boost_potion_recipe = [("sunflower", 33), ("yellow_slimeball", 33), ("algae", 33)]
@@ -503,7 +549,6 @@ class Player:
         """
         Crafting Water Boost Potion in the Alchemy Workshop (2, 3).
         Needs appropriate Alchemy Gathering level 10+.
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Water Boost Potions...", "magenta"))
         water_boost_potion_recipe = [("sunflower", 33), ("blue_slimeball", 33), ("algae", 33)]
@@ -513,7 +558,6 @@ class Player:
         """
         Crafting Copper Daggers in the Weaponcrafting Workshop (2, 1).
         Should only be crafted at levels 1-4.
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Copper Daggers...", "magenta"))
         copper_dagger_recipe = [("copper_bar", 90)]
@@ -523,7 +567,6 @@ class Player:
         """
         Crafting Apprentice Gloves in the Weaponcrafting Workshop (2, 1).
         Should only be crafted at levels 1-4.
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Apprentice Gloves...", "magenta"))
         apprentive_gloves_recipe = [("feather", 90)]
@@ -533,7 +576,6 @@ class Player:
         """
         Crafting Fishing Net in the Weaponcrafting Workshop (2, 1).
         Should only be crafted at levels 1-4.
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Fishing Net...", "magenta"))
         fishing_net_recipe = [("ash_plank", 90)]
@@ -543,7 +585,6 @@ class Player:
         """
         Crafting Copper Boots in the Gearcrafting Workshop (3, 1).
         Should only be crafted at levels 1-4.
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Copper Boots...", "magenta"))
         copper_boots_recipe = [("copper_bar", 80)]
@@ -553,7 +594,6 @@ class Player:
         """
         Crafting Wooden Shields in the Gearcrafting Workshop (3, 1).
         Should only be crafted at levels 1-4.
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Wooden Shields...", "magenta"))
         wooden_shield_recipe = [("ash_plank", 90)]
@@ -563,17 +603,16 @@ class Player:
         """
         Crafting Copper Armors in the Gearcrafting Workshop (3, 1).
         Should only be crafted at levels 5-10.
-        Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Copper Armors...", "magenta"))
         copper_armor_recipe = [("copper_bar", 75), ("wool", 25)]
         self.craft_loop(self.ws_gearcrafting_coords, copper_armor_recipe, "copper_armor", 15, recycle=recycle)
 
-    def craft_loop(self, ws_coords, inputs, output, output_qty, recycle=False):
+    def craft_loop(self, ws_coords, recipe, output, output_qty, recycle=False):
         """
         :param recycle: if ``true`` , immediately recycle items after crafting them
         :param ws_coords: workshop coordinates to craft at
-        :param inputs: list of tuples (item_code, qty)
+        :param recipe: list of tuples (item_code, qty)
         :param output: output item code
         :param output_qty: quantity of output item
         """
@@ -581,20 +620,15 @@ class Player:
             self.move(*self.bank_coords)
             self.deposit()
 
-            all_withdrawn = True
-            for item_code, qty in inputs:
-                if not self.withdraw(item_code, qty):
-                    all_withdrawn = False
-                    break
-
-            if not all_withdrawn:
-                self.deposit()
-                break
+            if self.check_recipe_craftable(recipe):
+                self.withdraw_recipe(recipe)
 
             self.move(*ws_coords)
             # craft returns True on success
             if self.craft(output, output_qty) and recycle:
                 self.recycle(output, output_qty)
+
+
 
     def get_skills_lvl(self):
         """
@@ -620,9 +654,6 @@ class Player:
                 alchemy = character.get('alchemy_level')
                 break
 
-
-
-
         self.combat = combat
         self.mining = mining
         self.woodcutting = woodcutting
@@ -635,12 +666,30 @@ class Player:
 
 
 
-
-
 if __name__ == '__main__':
     pass
-    # BlueMaiden = Player("BlueMaiden")
-    # BlueMaiden.recycle("copper_dagger", 1)
-    # move("BlueMaiden", 0, 1)
-    # fight("BlueMaiden")
-    # rest("BlueMaiden")
+    BlueMaiden = Player("BlueMaiden")
+    recipe = [("iron_ore", 55), ("yellow_slimeball", 24)]
+    BlueMaiden.deposit()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
