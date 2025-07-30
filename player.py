@@ -365,10 +365,11 @@ class Player:
         """
         self.get_skills_lvl()
 
-        if self.alchemy <= 20:
+        if 10 <= self.alchemy <= 20:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Alchemy Level {self.alchemy}: Crafting Earth Boost Potions..", "magenta"))
             self.craft_earth_boost_potion()
-        if self.alchemy <= 15:
+            self.craft_water_boost_potion()
+        if 5 <= self.alchemy <= 15:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Alchemy Level {self.alchemy}: Crafting Small HP Potions..", "magenta"))
             self.craft_small_hp_potion()
 
@@ -490,13 +491,23 @@ class Player:
 
     def craft_earth_boost_potion(self):
         """
-        Crafting small HP Potion in the Alchemy Workshop (2, 3).
+        Crafting Earth Boost Potion in the Alchemy Workshop (2, 3).
         Needs appropriate Alchemy Gathering level 10+.
         Stop when withdrawing materials from bank doesnt work
         """
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Earth Boost Potions...", "magenta"))
         earth_boost_potion_recipe = [("sunflower", 33), ("yellow_slimeball", 33), ("algae", 33)]
         self.craft_loop(self.ws_alchemy_coords, earth_boost_potion_recipe, "earth_boost_potion", 33)
+
+    def craft_water_boost_potion(self):
+        """
+        Crafting Water Boost Potion in the Alchemy Workshop (2, 3).
+        Needs appropriate Alchemy Gathering level 10+.
+        Stop when withdrawing materials from bank doesnt work
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Water Boost Potions...", "magenta"))
+        water_boost_potion_recipe = [("sunflower", 33), ("blue_slimeball", 33), ("algae", 33)]
+        self.craft_loop(self.ws_alchemy_coords, water_boost_potion_recipe, "water_boost_potion", 33)
 
     def craft_weapon_copper_dagger(self, recycle=False):
         """
