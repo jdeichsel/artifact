@@ -670,7 +670,7 @@ class Player:
             if self.check_recipe_craftable(recipe):
                 self.withdraw_recipe(recipe)
             else:
-                break 
+                break
 
             self.move(*ws_coords)
             # craft() returns True on success
