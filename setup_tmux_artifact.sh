@@ -20,7 +20,7 @@ done
 # (Lv2) fight: yellow slime: (1, -2)
 # (Lv5) fight: sheep: (5, 12)
 # (Lv6) fight: blue slime: (2, -1)
-# (Lv7) fight: ed slime: (1, -1)
+# (Lv7) fight: red slime: (1, -1)
 
 
 # (Lv1) fishing: gudgeon: (4, 2)

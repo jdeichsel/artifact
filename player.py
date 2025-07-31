@@ -34,6 +34,51 @@ class Player:
         self.cooking = None
         self.alchemy = None
 
+        # dictionary for gathering coords
+        self.gather_coords = {
+            "chicken": (0, 1),
+            "yellow_slime": (1, -2),
+            "sheep": (5, 12),
+            "blue_slime": (2, -1),
+            "red_slime": (1, -1),
+
+            "iron_ore": (1, 7),
+            "coal": (1, 6),
+
+            "ash_wood": (-1, 0),
+            "birch_wood": (-1, 6),
+
+        }
+        # (Lv1) fight: chicken: (0, 1)
+        # (Lv2) fight: yellow slime: (1, -2)
+        # (Lv5) fight: sheep: (5, 12)
+        # (Lv6) fight: blue slime: (2, -1)
+        # (Lv7) fight: red slime: (1, -1)
+
+        # (Lv1) fishing: gudgeon: (4, 2)
+        # (Lv10) fishing: shrimp: (5, 2)
+        # (Lv20) fishing: trout: (7, 12)
+        # (Lv30) fishing: bass: (6, 12)
+        # (Lv40) fishing: salmon: (-2, -4)
+
+        # (Lv1) alchemy: sunflower: (2, 2)
+        # (Lv20) alchemy: nettle: (7, 14)
+        # (Lv40) alchemy: glowstem: (1, 10)
+
+        # (Lv1) mining: copper: (2, 0)
+        # (Lv10) mining: iron: (1, 7)
+        # (Lv20) mining: coal: (1, 6)
+        # (Lv30) mining: gold: (6, -3)
+        # (Lv35) mining: strange rocks: (9, 11)
+        # (Lv40) mining: mithril: (-2, 13)
+
+        # (Lv1) wood: ash tree: (-1, 0)
+        # (Lv10) wood: spruce tree: (1, 9)
+        # (Lv20) wood: birch tree: (-1, 6)
+        # (Lv30) wood: dead tree: (9, 8)
+        # (Lv35) wood: magic tree: (3, 11)
+        # (Lv40) wood: maple tree: (4, 14)
+
     @staticmethod
     def time():
         return datetime.now().strftime("%H:%M:%S")
@@ -122,21 +167,27 @@ class Player:
                 return item["quantity"]
         return 0
 
-    def calculate_iron_coal_ratio(self):
+    def check_recipe_items_ratio(self, ratio_items):
         """
-        Check which of the two has less quantity and needs more.
+        Check which of the two has less quantity and needs more in the bank.
         Updates gathering coords of player.
-        Should only be called in check banking handler!
-        :return:
+        :param ratio_items: List of tuples [(code, qty)] to craft ONE item
         """
-        iron_ore, coal = self.get_quantity_of_bank_item("iron_ore"), self.get_quantity_of_bank_item("coal")
-        if iron_ore // 3 > coal // 7:
-            next_mining = "coal"
-            self.coords = (1, 6)
-        else:
-            next_mining = "iron_ore"
-            self.coords = (1, 7)
-        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"{iron_ore}x iron ore, {coal}x coal => Mining {next_mining} next", "yellow"))
+        # dictionary with (item name: amount of recipes craftable)
+        items_qty = {}
+        for item in ratio_items:
+            items_qty[item[0]] = self.get_quantity_of_bank_item(item[0]) // item[1]
+
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Ratios: {items_qty}","blue"))
+
+        lowest_ratio, lowest_name = 2 ** 31 - 1, None
+        for item_name in items_qty.keys():
+            if items_qty[item_name] < lowest_ratio:
+                lowest_ratio, lowest_name = items_qty[item_name], item_name
+
+        self.coords = self.gather_coords[lowest_name]
+
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Recipe: {ratio_items} => Now gathering {lowest_name}", "blue"))
 
 
     def check_banking(self, response):
@@ -147,17 +198,23 @@ class Player:
         if response.status_code == 497:
             self.move(*self.bank_coords)
             self.deposit()
+            self.get_skills_lvl()
 
             if self.role == "mining":
                 self.craft_all_bars()
 
-                # keep a ratio of 3 iron : 7 coal in the bank to craft iron bars
-                self.get_skills_lvl()
+                # keep a ratio of 3 iron : 7 coal in the bank to craft steel bars
                 if 10 <= self.mining <= 20:
-                    self.calculate_iron_coal_ratio()
+                    steel_bars_recipe = [("iron_ore", 3), ("coal", 7)]
+                    self.check_recipe_items_ratio(steel_bars_recipe)
 
             elif self.role == "wood":
                 self.craft_all_planks()
+
+                # keep a ratio of 4 ash wood : 6 birch wood in the bank to craft hardwood planks
+                if 20 <= self.woodcutting <= 30:
+                    hardwood_planks_recipe = [("birch_wood", 6), ("ash_wood", 4)]
+                    self.check_recipe_items_ratio(hardwood_planks_recipe)
 
             elif self.role == "fishing":
                 self.craft_all_food()
@@ -389,13 +446,21 @@ class Player:
         Cycles through all available recipes and crafts all items
         Any order is okay, no overlaps
         """
-        self.craft_ash_planks()
-        self.craft_spruce_planks()
+        self.get_skills_lvl()
+
+        if self.woodcutting <= 11:
+            self.craft_ash_planks()
+
+        if 10 <= self.woodcutting <= 19:
+            self.craft_spruce_planks()
+
+        if 20 <= self.woodcutting <= 30:
+            self.craft_hardwood_planks()
 
     def craft_all_bars(self):
         """
         Cycles through all available recipes and crafts all items
-        Starting with the highest level requirement, as the small HP potion eats all sunflowers
+        Some Overlaps: Starting with the highest level requirement, as the small HP potion eats all sunflowers
         """
 
         self.get_skills_lvl()
@@ -404,7 +469,7 @@ class Player:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Mining Level {self.mining}: Crafting Lv20-30 Bars..", "magenta"))
             self.craft_steel_bars()
 
-        if 10 <= self.mining <= 20:
+        elif 10 <= self.mining <= 19:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Mining Level {self.mining}: Crafting Lv10-20 Bars..", "magenta"))
             self.craft_iron_bars()
 
@@ -541,6 +606,14 @@ class Player:
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Spruce Planks...", "magenta"))
         spruce_planks_recipe = [("spruce_wood", 100)]
         self.craft_loop(self.ws_woodcutting_coords, spruce_planks_recipe, "spruce_plank", 10)
+
+    def craft_hardwood_planks(self):
+        """
+        Craft hardwood planks in the Woodcutting Workshop (-2, -3).
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Hardwood Planks...", "magenta"))
+        hardwood_planks_recipe = [("birch_wood", 60), ("ash_wood", 40)]
+        self.craft_loop(self.ws_woodcutting_coords, hardwood_planks_recipe, "hardwood_plank", 10)
 
     def craft_cooked_gudgeon(self):
         """
@@ -718,8 +791,8 @@ class Player:
 if __name__ == '__main__':
     pass
     BlueMaiden = Player("BlueMaiden")
-    recipe = [("iron_ore", 55), ("yellow_slimeball", 24)]
-    BlueMaiden.calculate_iron_coal_ratio()
+    recipe = [("birch_wood", 6), ("ash_wood", 4)]
+    BlueMaiden.check_recipe_items_ratio(recipe)
 
 
 
