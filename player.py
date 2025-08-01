@@ -35,6 +35,7 @@ class Player:
         self.alchemy = None
 
         # dictionary for gathering coords
+        # TODO ADD THE REST
         self.gather_coords = {
             "chicken": (0, 1),
             "yellow_slime": (1, -2),
