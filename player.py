@@ -45,9 +45,12 @@ class Player:
 
             "iron_ore": (1, 7),
             "coal": (1, 6),
+            "gold_ore": (6, -3),
 
             "ash_wood": (-1, 0),
             "birch_wood": (-1, 6),
+            "dead_wood": (9, 8),
+            "magic_wood": (3, 11),
 
         }
         # (Lv1) fight: chicken: (0, 1)
@@ -204,18 +207,23 @@ class Player:
             if self.role == "mining":
                 self.craft_all_bars()
 
-                # keep a ratio of 3 iron : 7 coal in the bank to craft steel bars
-                if 10 <= self.mining <= 20:
+                # ratio of 3 iron : 7 coal for steel bars
+                if 20 <= self.mining <= 30:
                     steel_bars_recipe = [("iron_ore", 3), ("coal", 7)]
                     self.check_recipe_items_ratio(steel_bars_recipe)
 
             elif self.role == "wood":
                 self.craft_all_planks()
 
-                # keep a ratio of 4 ash wood : 6 birch wood in the bank to craft hardwood planks
+                # ratio of 4 ash wood : 6 birch wood for hardwood planks
                 if 20 <= self.woodcutting <= 30:
                     hardwood_planks_recipe = [("birch_wood", 6), ("ash_wood", 4)]
                     self.check_recipe_items_ratio(hardwood_planks_recipe)
+
+                if 35 <= self.woodcutting <= 45:
+                    dead_wood_planks_recipe = [("dead_wood", 4), ("magic_wood", 6)]
+                    self.check_recipe_items_ratio(dead_wood_planks_recipe)
+
 
             elif self.role == "fishing":
                 self.craft_all_food()
@@ -458,6 +466,9 @@ class Player:
         if 20 <= self.woodcutting <= 30:
             self.craft_hardwood_planks()
 
+        if 30 <= self.woodcutting <= 40:
+            self.craft_dead_wood_planks()
+
     def craft_all_bars(self):
         """
         Cycles through all available recipes and crafts all items
@@ -465,6 +476,10 @@ class Player:
         """
 
         self.get_skills_lvl()
+
+        if 30 <= self.mining <= 40:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Mining Level {self.mining}: Crafting Lv30-40 Bars..", "magenta"))
+            self.craft_gold_bars()
 
         if 20 <= self.mining <= 30:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Mining Level {self.mining}: Crafting Lv20-30 Bars..", "magenta"))
@@ -592,6 +607,14 @@ class Player:
         steel_bars_recipe = [("iron_ore", 30), ("coal", 70)]
         self.craft_loop(self.ws_mining_coords, steel_bars_recipe, "steel_bar", 10)
 
+    def craft_gold_bars(self):
+        """
+        Craft gold bars in the Mining Workshop (1, 5)
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft gold bars...", "magenta"))
+        gold_bars_recipe = [("gold_ore", 100)]
+        self.craft_loop(self.ws_mining_coords, gold_bars_recipe, "gold_bar", 10)
+
     def craft_ash_planks(self):
         """
         Craft ash planks in the Woodcutting Workshop (-2, -3).
@@ -615,6 +638,14 @@ class Player:
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Hardwood Planks...", "magenta"))
         hardwood_planks_recipe = [("birch_wood", 60), ("ash_wood", 40)]
         self.craft_loop(self.ws_woodcutting_coords, hardwood_planks_recipe, "hardwood_plank", 10)
+
+    def craft_dead_wood_planks(self):
+        """
+        Craft Dead Wood planks in the Woodcutting Workshop (-2, -3).
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Dead Wood Planks...", "magenta"))
+        dead_wood_planks_recipe = [("dead_wood", 100)]
+        self.craft_loop(self.ws_woodcutting_coords, dead_wood_planks_recipe, "dead_wood_plank", 10)
 
     def craft_cooked_gudgeon(self):
         """
