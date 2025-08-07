@@ -4,7 +4,7 @@ tmux new-session -d -s $SESSION
 
 declare -a PLAYERS=("BlueMaiden" "WoodenMaiden" "MiningMaiden" "FishMaiden" "AlchMaiden")
 ACTIONS=("fight" "wood" "mining" "fishing" "alchemy")
-COORDS=("(1, -1)" "(9, 8)" "(1, 6)" "(6, 12)" "(1, 10)")
+COORDS=("(1, -1)" "(9, 8)" "(1, 6)" "(6, 12)" "(7, 14)")
 
 for i in "${!PLAYERS[@]}"; do
     tmux new-window -t $SESSION: -n "${PLAYERS[i]}"
