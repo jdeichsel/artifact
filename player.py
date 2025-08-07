@@ -231,6 +231,11 @@ class Player:
             elif self.role == "alchemy":
                 self.craft_all_potions()
 
+                # ratio of 2 nettle leaf : 1 sunflower for HP potions (cannot account for sap, is from woodcutting)
+                if 30 <= self.woodcutting <= 40:
+                    hardwood_planks_recipe = [("nettle_leaf", 2), ("sunflower", 1)]
+                    self.check_recipe_items_ratio(hardwood_planks_recipe)
+
             elif self.role == "fight":
                 self.craft_all_gear()
 
@@ -472,7 +477,7 @@ class Player:
     def craft_all_bars(self):
         """
         Cycles through all available recipes and crafts all items
-        Some Overlaps: Starting with the highest level requirement, as the small HP potion eats all sunflowers
+        Some Overlaps: Starting with the highest level requirement
         """
 
         self.get_skills_lvl()
@@ -522,6 +527,10 @@ class Player:
         :return:
         """
         self.get_skills_lvl()
+
+        if 30 <= self.alchemy <= 40:
+            print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Alchemy Level {self.alchemy}: Crafting HP Potions..", "magenta"))
+            self.craft_hp_potion()
 
         if 10 <= self.alchemy <= 20:
             print(f"[{self.name}][{self.time()}]: " + self.color_text(f"I'm Alchemy Level {self.alchemy}: Crafting Earth Boost Potions..", "magenta"))
@@ -705,6 +714,15 @@ class Player:
         print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft Water Boost Potions...", "magenta"))
         water_boost_potion_recipe = [("sunflower", 33), ("blue_slimeball", 33), ("algae", 33)]
         self.craft_loop(self.ws_alchemy_coords, water_boost_potion_recipe, "water_boost_potion", 33)
+
+    def craft_hp_potion(self):
+        """
+        Crafting HP Potion in the Alchemy Workshop (2, 3).
+        Needs appropriate Alchemy Gathering level 30+.
+        """
+        print(f"[{self.name}][{self.time()}]: " + self.color_text(f"Starting to craft HP Potion...", "magenta"))
+        hp_potion_recipe = [("nettle_leaf", 50), ("sunflower", 25), ("sap", 25)]
+        self.craft_loop(self.ws_alchemy_coords, hp_potion_recipe, "health_potion", 25)
 
     def craft_weapon_copper_dagger(self, recycle=False):
         """
