@@ -44,6 +44,6 @@ done
 # (Lv10) wood: spruce tree: (1, 9)
 # (Lv20) wood: birch tree: (-1, 6)
 # (Lv30) wood: dead tree: (9, 8)
-# (Lv35) wood: magic tree: (3, 11)
+# (Lv35) wood: magic tree: (3, 11) EVENT ONLY
 # (Lv40) wood: maple tree: (4, 14)
 

@@ -220,9 +220,10 @@ class Player:
                     hardwood_planks_recipe = [("birch_wood", 6), ("ash_wood", 4)]
                     self.check_recipe_items_ratio(hardwood_planks_recipe)
 
-                if 35 <= self.woodcutting <= 45:
-                    dead_wood_planks_recipe = [("dead_wood", 4), ("magic_wood", 6)]
-                    self.check_recipe_items_ratio(dead_wood_planks_recipe)
+                # TODO need handling of magic tree event before we can use this
+                # if 35 <= self.woodcutting <= 45:
+                #     dead_wood_planks_recipe = [("dead_wood", 4), ("magic_wood", 6)]
+                #     self.check_recipe_items_ratio(dead_wood_planks_recipe)
 
 
             elif self.role == "fishing":
